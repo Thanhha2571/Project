@@ -21,7 +21,8 @@ const DoingExerciseItem = (props) => {
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
-    const [currentPage, setCurrentQuestionPage] = useState(1);
+    const [currentQuestion, setCurrentQuestion] = useState(1);
+    const totalQuestions = listQuestions.length;
 
     const isCorrect = (flag) => {
         return flag === 1;
@@ -45,18 +46,14 @@ const DoingExerciseItem = (props) => {
         }
     };
 
-    // Create a function to determine if an answer is selected
     const isAnswerSelected = (choice) => selectedAnswer === choice;
-
-    useEffect(() => {
-        // Change the current question when the page changes
-        const startIndex = (currentPage - 1) * datesPerPage;
-        const endIndex = startIndex + datesPerPage;
-        setCurrentQuestionPage(listQuestions.slice(startIndex, endIndex));
-    }, [currentPage]);
+    const hasAnsweredQuestion = selectedAnswer !== null;
 
     return (
         <div className="flex flex-col gap-4 p-5 w-full h-auto justify-center items-center">
+            <div className="text-sm">
+                Question {currentQuestion} of {totalQuestions}
+            </div>
             <span className="text-2xl">{question}</span>
             <div className="flex flex-wrap w-full">
                 <div className="p-10 w-1/2">
@@ -108,22 +105,21 @@ const DoingExerciseItem = (props) => {
                         )}
                     </div>
                 )}
-                <div className="flex gap-3 flex-wrap justify-center items-center">
-                    {Array.from({
-                        length: Math.ceil(listQuestions.length / datesPerPage),
-                    }).map((_, index) => (
-                        <Button
-                            className="bg-neutral-100 text-black px-6 py-6 w-1/3 flex items-center justify-center border-solid border border-black rounded-full"
-                            type="primary"
-                            onClick={() => {
-                                setCurrentPage(index + 1);
-                                setSelectedAnswer(null);
-                                setShowMessage(false); 
-                            }}
-                        >
-                            {index + 1}
-                        </Button>
-                    ))}
+                <div
+                    className={`bg-blue-500 px-10 py-2 text-2xl border border-solid border-neutral-300 rounded-2xl cursor-pointer hover:bg-blue-800 justify-center items-center ${hasAnsweredQuestion ? "" : "cursor-not-allowed"}`}
+                    type="primary"
+                    onClick={() => {
+                        if (currentQuestion === totalQuestions) {
+                            // Handle Submit logic here
+                        } else if (hasAnsweredQuestion) {
+                            setCurrentPage((prevPage) => prevPage + 1);
+                            setCurrentQuestion((prevQuestion) => prevQuestion + 1);
+                            setSelectedAnswer(null);
+                            setShowMessage(false);
+                        }
+                    }}
+                >
+                    {currentQuestion === totalQuestions ? "SUBMIT" : "NEXT QUESTION"}
                 </div>
             </div>
         </div>
@@ -131,6 +127,9 @@ const DoingExerciseItem = (props) => {
 };
 
 export default DoingExerciseItem;
+
+
+
 
 
 
