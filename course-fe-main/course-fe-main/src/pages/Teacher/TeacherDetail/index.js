@@ -29,8 +29,10 @@ const TeacherDetails = () => {
             setCourse(res.data.courseDetail);
             setDataLecture(res.data.lecture);
             setDataStudent(res.data.studentList);
+            // console.log(res.data);
         })
     }
+    // console.log(dataLecture?.length);
     const items = [
         {
             key: 'course_id',
@@ -233,7 +235,7 @@ const TeacherDetails = () => {
     const [showStudentList, setShowStudentList] = useState(false);
     const handleShowLecture = async () => {
         setShowLecture(true);
-        if (dataLecture.length == 0) {
+        if (dataLecture?.length == 0) {
             toast.error('Không tìm thấy bài giảng !', {
                 position: "top-right",
                 autoClose: 2000,

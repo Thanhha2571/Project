@@ -5,31 +5,35 @@ import { ApiClient } from "../../interceptors/axios";
 import { Layout, Menu, Button, theme, Descriptions, Badge, Space, Table, Modal, Avatar } from 'antd';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-function CourseDetail() {
+import Login from "../Login";
+function CourseDetail(props) {
     const { slug } = useParams();
+    const { courseDetail, setCourseDetail } = props
     const nav = useNavigate();
-    const [course, setCourse] = useState([]);
+    const [course, setCourse] = useState({});
     const [dataLecture, setDataLecture] = useState();
 
     useEffect(() => {
         getData();
+        setCourseDetail(slug)
     }, []);
     const getData = async () => {
         await ApiClient().get(`teacher/course-detail/${slug}`).then(res => {
             if (res.status == 200) {
-                setCourse(res.data.courseDetail);
+                setCourse(res.data?.courseDetail);
                 setDataLecture(res.data.lecture);
             }
         })
     }
+
     const handleRegisterCourse = async () => {
         const token = localStorage.getItem('accessToken')
         const data = {
-            course_id: course.course_id
+            course_id: course?.course_id
         }
         if (!token) {
             return nav('/login')
-        } else if (course.isRegister) {
+        } else if (course?.isRegister) {
             return nav(`/learning/${slug}`)
         }
         await ApiClient().post('student/register-course', data).then(res => {
@@ -52,11 +56,11 @@ function CourseDetail() {
     const handleOpenListExercise = () => {
         const token = localStorage.getItem('accessToken')
         const data = {
-            course_id: course.course_id
+            course_id: course?.course_id
         }
         if (!token) {
             return nav('/login')
-        } else if (course.isRegister) {
+        } else if (course?.isRegister) {
             return nav(`/list-exercise/${slug}`)
         }
     }
@@ -64,37 +68,42 @@ function CourseDetail() {
         {
             key: 'course_id',
             label: 'ID Khoá Học',
-            children: `${course.course_id}`,
+            // children: `${course?.course_id}`,
+            children: course ? course.course_id : null
         },
         {
             key: 'course_name',
             label: 'Tên Khoá Học',
-            children: `${course.course_name}`,
+            // children: `${course?.course_name}`,
+            children: course ? course.course_name : null
         },
-        {
-            key: 'subject_id',
-            label: 'Thể Loại Môn Học',
-            children: `${course.sub_id} - ${course.sub_name}`,
-        },
+        // {
+        //     key: 'subject_id',
+        //     label: 'Thể Loại Môn Học',
+        //     children: `${course?.sub_id} - ${course?.sub_name}`,
+        // },
 
         {
             key: 'dateStart',
             label: 'Ngày Bắt Đầu',
-            children: `${course.dateStart}`,
+            // children: `${course?.dateStart}`,
+            children: course ? course.dateStart :null
         },
         {
             key: 'dateEnd',
             label: 'Ngày Kết Thúc',
-            children: `${course.dateEnd}`,
+            // children: `${course?.dateEnd}`,
+            children: course ? course.dateEnd :null
         },
         {
             key: 'course_price',
             label: 'Giá Khoá Học',
-            children: `${course.course_price} VND`,
+            // children: `${course?.course_price} VND`,
+            children: course ? course.course_price :null
         },
         {
             key: 'course_image',
-            children: course.course_image ? <img width={300} height={100} src={`http://localhost:8081/uploads/courses/${course.course_id}/${course.course_image}`} alt='image' /> : ''
+            children: course?.course_image ? <img width={300} height={100} src={`http://localhost:8081/uploads/courses/${course.course_id}/${course.course_image}`} alt='image' /> : ''
         },
     ];
     return (
@@ -104,12 +113,12 @@ function CourseDetail() {
             </div>
             <div style={{ width: '70%', margin: '40px 0px 0px 40px' }}>
                 <Descriptions className="text-center" column={1} items={items} />
-                {/* {course.isRegister == true
+                {course?.isRegister == true
                     ?
                     <Button type="primary" onClick={handleRegisterCourse} style={{ backgroundColor: 'green' }}>Tiếp Tục Học</Button>
                     :
                     <Button type="primary" onClick={handleRegisterCourse} style={{ backgroundColor: 'green' }}>Đăng Ký Ngay</Button>
-                } */}
+                }
                 <Button type="primary" onClick={handleOpenListExercise} style={{ backgroundColor: 'green' }}>Lam Bai Tap</Button>
             </div>
             <ToastContainer

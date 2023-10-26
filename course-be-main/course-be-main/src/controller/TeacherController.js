@@ -4,6 +4,7 @@ const Subject = require('../model/Subject');
 const Lecture = require('../model/Lecture');
 const Exercise = require('../model/Exercise');
 const History = require('../model/HistoryCourse');
+const MarkModelST = require("../model/mark");
 const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const fs = require('fs-extra');
@@ -264,6 +265,26 @@ const TeacherController = {
         const exercise = await Exercise.find({ lecture_id: lecture.lecture_id });
         return res.status(200).json({ success: true, lecture, exercise });
     },
+    getMarkStudent : async (req, res, next) => {
+        // const token = req.headers['authorization'];
+        // const token_decode = jwt_decode(token);
+        // const getCourse = req.params.param1;
+        // console.log("getCourse :" , getCourse)
+        // const lecture = req.params.param2;
+        // console.log("lecture :" , lecture)
+        // const getMarkStudent = await MarkModelST.findOne({
+        //     lecture_name:lecture ,
+        //     course_name: getCourse
+
+            
+        // })
+        // console.log("getMarkStudent :" , getMarkStudent)
+        // res.status(200).json({ success: true, "mark of this course : " :getMarkStudent })
+        await MarkModelST.find().then(marks => {
+            return res.status(200).json({ success: true, data: marks })
+        })
+    },
+
     postCreateExercise: async (req, res, next) => {
         const { lecture_id, ex_id, ex_name } = req.body;
         const token = req.headers['authorization'];

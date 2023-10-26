@@ -1,5 +1,6 @@
 import './App.css';
 import { BrowserRouter, Router, Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 import AdminRoute from './routes/AdminRoute';
 import TeacherRoute from './routes/TeacherRoute';
 import Home from '../src/pages/Home';
@@ -20,7 +21,11 @@ import CourseDetail from './pages/CourseDetail'
 import Learning from './pages/Learning';
 import Exercise from './pages/Exercise/Exercise';
 import DoingExercise from './pages/Exercise/DoingExercise';
+import Mark from './pages/Mark/Mark';
 function App() {
+  const [ courseDetail, setCourseDetail ] = useState() 
+  const [ resultExam, setResultExam ] = useState()
+  const [ lectureDetail, setLectureDetail ] = useState()
   return (
     <BrowserRouter>
       <Routes>
@@ -30,10 +35,11 @@ function App() {
         <Route path="/reset-password" element={<Reset_Password />} />
         <Route path='/home' element={<Home />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/:slug" element={<CourseDetail />} />
+        <Route path="/:slug" element={<CourseDetail courseDetail={courseDetail} setCourseDetail={setCourseDetail}/>} />
         <Route path="/learning/:slug" element={<Learning />} />
         <Route path="/list-exercise/:slug" element={<Exercise />} />
-        <Route path="/doing-exercise/:slug" element={<DoingExercise />} />
+        <Route path="/doing-exercise/:slug" element={<DoingExercise courseDetail={courseDetail} resultExam={resultExam} setResultExam={setResultExam} />} />
+        <Route path="/mark/:course/:lecture" element={<Mark resultExam={resultExam} courseDetail={courseDetail} />} />
         <Route exact path='/' element={<TeacherRoute />}>
           <Route path="/teacher" element={<Teacher />} />
           <Route path="/teacher/course/:slug" element={<TeacherDetails />} />

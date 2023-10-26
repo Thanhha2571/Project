@@ -3,17 +3,21 @@ import { useEffect, useState } from "react";
 import { ApiClient } from "../../interceptors/axios";
 import DoingExerciseItem from "./DoingExerciseItem";
 import QuestionIcon from "../../question-icon.png";
-const DoingExercise = () => {
+const DoingExercise = (props) => {
+    const { courseDetail, resultExam, setResultExam } = props
+    console.log(courseDetail);
     const { slug } = useParams()
+    console.log(slug);
     const [listQuestions, setListQuestions] = useState([])
     useEffect(() => {
         getData();
+        // console.log("sđfsd");
     }, []);
 
     const getData = async () => {
         await ApiClient().get(`student/course/lecture-detail/${slug}`).then(res => {
             setListQuestions(res.data.exercises[0]?.ex_question);
-            console.log(res.data.exercises[0]?.ex_question);
+            // console.log(res.data.exercises[0]?.ex_question);
             // console.log(res.data.exercises[0]?.ex_questions);
         })
     }
@@ -23,8 +27,8 @@ const DoingExercise = () => {
     const indexOfLastDate = currentPage * datesPerPage;
     const indexOfFirstDate = indexOfLastDate - datesPerPage;
     const currentQuestionSlice = listQuestions?.slice(indexOfFirstDate, indexOfLastDate);
-    console.log(currentQuestionSlice);
-    console.log(listQuestions);
+    // console.log(currentQuestionSlice);
+    // console.log(listQuestions);
 
     return (
         <div className="flex flex-col items-center font-PlaypenSans w-full h-screen bg-blue-500">
@@ -40,6 +44,10 @@ const DoingExercise = () => {
                         {currentQuestionSlice.map((question, index) => (
                             <DoingExerciseItem
                                 key={index}
+                                resultExam={resultExam}
+                                setResultExam={setResultExam}
+                                courseDetail={courseDetail}
+                                lectureDetail={slug}
                                 listQuestions={listQuestions}
                                 datesPerPage={datesPerPage}
                                 setCurrentPage={setCurrentPage}

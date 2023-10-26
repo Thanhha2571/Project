@@ -29,6 +29,7 @@ const Teacher = () => {
         await ApiClient().get('teacher/all-course').then(res => {
             if (res.status == 200) {
                 setState(res.data.data)
+                // console.log(res.data);
             } else {
                 nav('/login')
             }

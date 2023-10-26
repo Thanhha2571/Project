@@ -23,11 +23,13 @@ function LectureDetail() {
     // console.log(slug);
     const [lectureData, setLectureData] = useState([]);
     const [exerciseData, setExerciseData] = useState([]);
+    const [resultExamData, setResultExamData] = useState([]);
     const {
         token: { colorBgContainer },
     } = theme.useToken();
     useEffect(() => {
         getData();
+        getResult();
     }, []);
     const getData = async () => {
         await ApiClient().get(`teacher/course/lecture-detail/${slug}`).then(res => {
@@ -36,32 +38,43 @@ function LectureDetail() {
             console.log(res.data);
         })
     }
+    const getResult = async () => {
+        await ApiClient().get("teacher/get-mark").then (res => {
+            setResultExamData(res.data.data)
+            console.log(res.data.data);
+        })
+    }
+    const resultNameApi = lectureData?.lecture_slug;
+    const filteredResult = resultExamData.filter((item) => item.lecture_name === resultNameApi);
+
+    console.log(filteredResult);
     const items = [
         {
             key: 'course_id',
             label: 'ID Khoá Học',
-            children: `${lectureData.course_id}`,
+            children: `${lectureData?.course_id}`,
         },
         {
             key: 'lecture_name',
             label: 'Tên Bài Giảng',
-            children: `${lectureData.lecture_name}`,
+            children: `${lectureData?.lecture_name}`,
         },
         {
             key: 'lecture_content',
             label: 'Nội Dung Bài Giảng',
-            children: `${lectureData.lecture_content}`,
+            children: `${lectureData?.lecture_content}`,
         },
         {
             key: 'lecture_document',
             label: 'Tài Liệu Tham Khảo',
-            children: `${lectureData.lecture_document}`,
+            children: `${lectureData?.lecture_document}`,
         },
         {
             label: 'Danh Sách Bài Tập',
         }
 
     ];
+
     const columns = [
         {
             title: 'Tên Bài Tập',
@@ -127,9 +140,74 @@ function LectureDetail() {
             ),
         },
     ];
+
+    const columnsResultExam = [
+        {
+            title: 'Tên Học Viên',
+            // dataIndex: 'student_email',
+            key: 'student_email',
+            render: (record) => {
+                const studentEmail = record.student_email
+                return (<div>{studentEmail}</div>)
+            }
+        },
+        {
+            title: 'Kết Quả',
+            key: 'mark',
+            render: (record) => {
+                const studentMark = record.mark
+                return (<div>{studentMark}</div>)
+            }
+        },
+        // {
+        //     title: 'Nội Dung Câu Hỏi',
+        //     key: 'question_name',
+        //     render: (record) => {
+        //         const data_questions_1 = record.ex_question;
+        //         // console.log(data_questions_1.question_name);
+        //         return data_questions_1.map((data_1) => <div>
+        //             <p key={data_1.question_a}>A. {data_1.question_content.question_a}</p>
+        //             <p key={data_1.question_b}>B. {data_1.question_content.question_b}</p>
+        //             <p key={data_1.question_c}>C. {data_1.question_content.question_c}</p>
+        //             <p key={data_1.question_d}>D. {data_1.question_content.question_d}</p>
+        //             <p className="mb-4"></p>
+        //         </div>)
+        //     }
+        // },
+        // {
+        //     title: 'Đáp Án',
+        //     key: 'question_content',
+        //     render: (record) => {
+        //         const data_answers = record.ex_question;
+        //         return data_answers.map((data_answer) => <div>
+        //             <p key={data_answer.question_a}>A. {data_answer.question_content.flag_a == 0 ? 'Sai' : 'Đúng'}</p>
+        //             <p key={data_answer.question_b}>B. {data_answer.question_content.flag_b == 0 ? 'Sai' : 'Đúng'}</p>
+        //             <p key={data_answer.question_c}>C. {data_answer.question_content.flag_c == 0 ? 'Sai' : 'Đúng'}</p>
+        //             <p key={data_answer.question_d}>D. {data_answer.question_content.flag_d == 0 ? 'Sai' : 'Đúng'}</p>
+        //             <p className="mb-4"></p>
+        //         </div>)
+        //     }
+        // },
+        // {
+        //     title: 'Action',
+        //     key: 'Action',
+        //     render: (record) => (
+        //         <Space size="middle">
+        //             <Button type="primary" style={{ backgroundColor: 'red' }} data-id={record._id} data-name={record.ex_name} onClick={showDelModal}>Xoá</Button>
+        //             {/* <Button type="primary" style={{ backgroundColor: 'green' }} data-id={record._id} >Sửa</Button> */}
+        //             <Button type="primary" style={{ backgroundColor: 'blue' }} data-id={record._id} onClick={showAddQuestion}>Thêm Câu Hỏi</Button>
+        //         </Space>
+        //     ),
+        // },
+    ];
     // -----------------------------------------ADD EXERCISE MODAL ------------------------------
     const [addOpen, setAddOpen] = useState(false);
+    const [resultExamState, setResultExamState] = useState(false)
     const { register, handleSubmit } = useForm();
+
+    const showResultExam = () => {
+        setResultExamState(!resultExamState)
+    }
     const showAddModal = () => {
         setAddOpen(true);
     }
@@ -335,8 +413,14 @@ function LectureDetail() {
 
                 >
                     <Descriptions title={`Thông Tin Bài Giảng :  ${lectureData.lecture_name}`} column={1} items={items} />
-                    <Button className='mb-4' type="primary" style={{ backgroundColor: 'green' }} onClick={showAddModal}>Thêm Bài Tập</Button>
+                    <div className="flex gap-5">
+                        <Button className='mb-4' type="primary" style={{ backgroundColor: 'green' }} onClick={showAddModal}>Thêm Bài Tập</Button>
+                        <Button type="primary" style={{ backgroundColor: 'green' }} onClick={showResultExam} >Xem Kết Quả</Button>
+                    </div>
+                    {/* <Button className='mb-4' type="primary" style={{ backgroundColor: 'green' }} onClick={showAddModal}>Thêm Bài Tập</Button>
+                    <Button type="primary" style={{ backgroundColor: 'blue' }} onClick={handleShowList}>Danh Sách Học Viên</Button> */}
                     <Table columns={columns} dataSource={exerciseData} rowKey={(record) => record.ex_id} />
+                    {resultExamState && (<Table columns={columnsResultExam} dataSource={filteredResult} />)}
                 </Content>
                 {/* ADD EXERCISE */}
                 <Modal

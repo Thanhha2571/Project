@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import SmileIcon from "../../smile-icon.png";
 import SadIcon from "../../sad-icon.png";
 import { Button } from "antd";
-
+import { useNavigate } from "react-router-dom";
+import { ApiClient } from "../../interceptors/axios";
+import axios from "axios";
 const DoingExerciseItem = (props) => {
     const {
         setCurrentPage,
@@ -17,12 +19,53 @@ const DoingExerciseItem = (props) => {
         flag_c,
         flag_d,
         datesPerPage,
+        courseDetail,
+        lectureDetail,
+        resultExam,
+        setResultExam
     } = props;
 
+    const nav = useNavigate()
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState(1);
+    const [correctAnswers, setCorrectAnswers] = useState(0)
     const totalQuestions = listQuestions.length;
+
+    const handleQuizSubmission = async () => {
+        const correctAnswersString = correctAnswers.toString();
+        const totalQuestionsString = totalQuestions.toString();
+        const result = `${correctAnswersString}/${totalQuestionsString}`;
+        console.log(result);
+    
+        try {
+            // Include the token in the headers
+            // const headers = {
+            //     Authorization: 'Bearer ' + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhQGdtYWlsLmNvbSIsImxldmVsIjoiMSIsImlhdCI6MTY5ODI0MDQ4OCwiZXhwIjoxNjk4MzI2ODg4fQ.GsszpfV0vecat_Hu1mkIGchs5KWhYzDrl6SsceH05u4", // Replace YOUR_AUTH_TOKEN with the actual token
+            // };
+    
+            const response = await ApiClient().post(
+                `student/update-mark/${courseDetail}/${lectureDetail}`,
+                {mark: result},
+                // { headers }
+            );
+    
+            if (response.status === 200) {
+                // Handle the API response if needed
+                setResultExam(result)
+                console.log("API response:", response);
+                // Redirect to a different page after submission
+                nav(`/mark/${courseDetail}/${lectureDetail}`);
+            } else {
+                console.log("API error: Unexpected response status");
+            }
+        } catch (error) {
+            console.error("API error:", error);
+            // Handle API error
+        }
+    };
+
+
 
     const isCorrect = (flag) => {
         return flag === 1;
@@ -43,8 +86,14 @@ const DoingExerciseItem = (props) => {
         if (selectedAnswer === null) {
             setSelectedAnswer(selected);
             setShowMessage(true);
+
+            if (isCorrect(props[`flag_${selected.toLowerCase()}`])) {
+                setCorrectAnswers(correctAnswers + 1);
+                // Increment correctAnswers
+            }
         }
     };
+    // console.log(correctAnswers);
 
     const isAnswerSelected = (choice) => selectedAnswer === choice;
     const hasAnsweredQuestion = selectedAnswer !== null;
@@ -64,7 +113,7 @@ const DoingExerciseItem = (props) => {
                         A. {answer_a}
                     </div>
                 </div>
-                <div className="p-10 w-1/2 cursor-pointer">
+                <div className="p-10 w-1/2">
                     <div
                         onClick={() => handleAnswerClick("B")}
                         className={`px-10 py-5 text-2xl border border-solid border-neutral-300 rounded-2xl cursor-pointer ${getBackgroundColor(flag_b, isAnswerSelected("B"))} ${getHoverClass(isAnswerSelected("B"))}`}
@@ -72,7 +121,7 @@ const DoingExerciseItem = (props) => {
                         B. {answer_b}
                     </div>
                 </div>
-                <div className="p-10 w-1/2 cursor-pointer">
+                <div className="p-10 w-1/2">
                     <div
                         onClick={() => handleAnswerClick("C")}
                         className={`px-10 py-5 text-2xl border border-solid border-neutral-300 rounded-2xl cursor-pointer ${getBackgroundColor(flag_c, isAnswerSelected("C"))} ${getHoverClass(isAnswerSelected("C"))}`}
@@ -80,7 +129,7 @@ const DoingExerciseItem = (props) => {
                         C. {answer_c}
                     </div>
                 </div>
-                <div className="p-10 w-1/2 cursor-pointer">
+                <div className="p-10 w-1/2">
                     <div
                         onClick={() => handleAnswerClick("D")}
                         className={`px-10 py-5 text-2xl border border-solid border-neutral-300 rounded-2xl cursor-pointer ${getBackgroundColor(flag_d, isAnswerSelected("D"))} ${getHoverClass(isAnswerSelected("D"))}`}
@@ -110,7 +159,11 @@ const DoingExerciseItem = (props) => {
                     type="primary"
                     onClick={() => {
                         if (currentQuestion === totalQuestions) {
-                            // Handle Submit logic here
+                            // console.log(`${correctAnswers}/${totalQuestions}`);
+                            // ApiClient().post(`update-mark/${courseDetail}/${lectureDetail}`)
+                            // nav(`/mark/${courseDetail}/${lectureDetail}`)
+                            handleQuizSubmission();
+
                         } else if (hasAnsweredQuestion) {
                             setCurrentPage((prevPage) => prevPage + 1);
                             setCurrentQuestion((prevQuestion) => prevQuestion + 1);

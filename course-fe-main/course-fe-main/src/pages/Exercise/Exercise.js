@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ExerciseItem from "./ExerciseItem";
+
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -16,6 +17,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useEffect, useState } from "react";
 import { ApiClient } from "../../interceptors/axios";
 import { useForm } from "react-hook-form";
+import React from "react"
+
 
 const { Header, Content } = Layout;
 const Exercise = () => {
@@ -31,10 +34,10 @@ const Exercise = () => {
         })
     }
 
-    console.log(listExercise);
+    // console.log(listExercise);
     return (
         <div className="px-20 flex flex-col">
-            <div className="text-center mt-20 text-2xl font-bold">DANH SÁCH BÀI TẬP</div>
+            <div className="text-center mt-20 text-2xl font-bold font-PlaypenSans">DANH SÁCH BÀI TẬP</div>
             {listExercise.map(({ lecture_name, _id, lecture_slug, lecture_content }) => (
                 <ExerciseItem
                     key={_id}

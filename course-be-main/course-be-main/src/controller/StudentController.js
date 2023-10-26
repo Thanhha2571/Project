@@ -4,6 +4,7 @@ const History = require('../model/HistoryCourse');
 const Lecture = require('../model/Lecture');
 const Subject = require('../model/Subject');
 const Exercise = require('../model/Exercise');
+const MarkModelST = require("../model/mark");
 const FAQs = require('../model/FAQs');
 const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
@@ -21,15 +22,17 @@ const StudentController = {
     getLectureDetail: async (req, res, next) => {
         try {
             const slug = req.params.slug;
-            console.log(slug);
+            // const course_slug = req.params.course_slug;
+            // console.log(slug);
+            // console.log(course_slug);
             const lecture = await Lecture.findOne({ lecture_slug: slug });
-    
+
             if (!lecture) {
                 return res.status(404).json({ success: false, message: 'Lecture not found' });
             }
-    
+
             const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
-    
+
             return res.status(200).json({ success: true, lecture, exercises });
         } catch (error) {
             // Handle any potential errors, log them, and provide an appropriate response.
@@ -114,6 +117,27 @@ const StudentController = {
         const token_decode = jwt_decode(token);
         const history = await History.find({ email: token_decode.email }).lean();
         return res.status(200).json({ success: true, history })
+    },
+    MarkStudent: async (req, res, next) => {
+        const token = req.headers["authorization"];
+        const token_decode = jwt_decode(token);
+        const email_student = token_decode.email
+        const MarkStudent = req.body.mark;
+        const course = req.params.param1;
+        const lecture = req.params.param2;
+        console.log("course :", course)
+        console.log("lecture:", lecture)
+        console.log(req.body);
+
+        const createMark = await MarkModelST.create({
+            course_name: course,
+            lecture_name: lecture,
+            student_email: email_student,
+            mark: MarkStudent
+        })
+
+
+        res.status(200).json({ success: true, "mark of this course : ": createMark })
     }
 }
 module.exports = StudentController;

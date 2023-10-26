@@ -16,7 +16,8 @@ router.get('/delete-lecture/:_id', teacherRole, TeacherController.getDelLecture)
 router.get('/course/lecture-detail/:slug', teacherRole, TeacherController.getLectureDetail);
 router.get('/course/lecture/exercise/delete-exercise/:id', teacherRole, TeacherController.getDelEx);
 router.get('/delete-student/:_id', teacherRole, TeacherController.deleteStudent);
-
+// router.get('/get-mark/:param1/:param2', TeacherController.getMarkStudent);
+router.get('/get-mark', TeacherController.getMarkStudent);
 
 router.post('/create-course', upload_course.single('image'), TeacherController.postCreateCourse);
 router.post('/edit-course', teacherRole, TeacherController.postEditCourse);
