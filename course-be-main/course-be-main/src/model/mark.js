@@ -53,13 +53,10 @@ const MarkModel = new Schema({
         type: String,
         required: true,
     },
-    
     mark: {
-        type: String,
+        type: Number,
         required: true
     },
-    
-    
 }, {
     timestamps: true
 });

@@ -15,6 +15,8 @@ router.post('/update-information', upload.single('file'), StudentController.upda
 router.get('/all-course', StudentController.getAllCourse);
 // router.get('/course/lecture-detail/:course_slug/:slug',StudentController.getLectureDetail);
 router.get('/course/lecture-detail/:slug',StudentController.getLectureDetail);
+router.get('/course/question-detail/:slug',StudentController.getQuestionDetail);
+router.post('/post-answer/:slug', StudentController.postAnswer);
 router.get('/all-faqs', StudentController.getFaqs);
 router.post('/update-mark/:param1/:param2', StudentController.MarkStudent);
 router.get('/history-course', StudentController.getHistoryCourse);

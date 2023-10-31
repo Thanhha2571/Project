@@ -9,6 +9,7 @@ const FAQs = require('../model/FAQs');
 const jwt = require('jsonwebtoken');
 const jwt_decode = require('jwt-decode');
 const fs = require('fs-extra');
+const mark = require('../model/mark');
 const StudentController = {
     getAllCourse: async (req, res, next) => {
         await Course.find({ course_status: true }).sort({ createdAt: -1 }).limit(3).lean().then(async courses => {
@@ -26,12 +27,14 @@ const StudentController = {
             // console.log(slug);
             // console.log(course_slug);
             const lecture = await Lecture.findOne({ lecture_slug: slug });
+            // console.log(lecture);
 
             if (!lecture) {
                 return res.status(404).json({ success: false, message: 'Lecture not found' });
             }
 
             const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+            // console.log(exercises);
 
             return res.status(200).json({ success: true, lecture, exercises });
         } catch (error) {
@@ -40,7 +43,124 @@ const StudentController = {
             return res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
+    getQuestionDetail: async (req, res, next) => {
+        try {
+            const slug = req.params.slug;
+            const lecture = await Lecture.findOne({ lecture_slug: slug });
+            const currentProgress = await mark.findOne({ lecture_name: lecture.lecture_name });
+            // console.log(currentProgress.mark);
+            const currentMark = currentProgress.mark;
 
+            if (!lecture) {
+                return res.status(404).json({ success: false, message: 'Lecture not found' });
+            }
+
+            const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+
+            const questionNameToFind = req.query.question_name;
+
+            const specificExercise = exercises.find((exercise) =>
+                exercise.ex_question.some((question) => question.question_name === questionNameToFind)
+            );
+
+            if (specificExercise) {
+                const specificQuestion = specificExercise.ex_question.find(
+                    (question) => question.question_name === questionNameToFind
+                );
+
+                if (specificQuestion) {
+                    const correctAnswer = ['A', 'B', 'C', 'D']
+                        .find((option) => specificQuestion.question_content[`flag_${option.toLowerCase()}`] === 1);
+
+                    specificQuestion.correct_answer = correctAnswer;
+
+                    console.log('Specific Question:', specificQuestion);
+                    const userAnswer = req.body.userAnswer;
+
+                    if (userAnswer == correctAnswer) {
+                        currentMark = currentMark + 1;
+                        await mark.findOneAndUpdate(
+                            { lecture_name: lecture.lecture_name },
+                            { $set: mark == currentMark }
+                        )
+                    }
+                    return res.status(200).json({ success: true, lecture, specificQuestion });
+                } else {
+                    console.log('Specific question not found');
+                    return res.status(404).json({ success: false, message: 'Question not found' });
+                }
+            } else {
+                console.log('Exercise not found');
+                return res.status(404).json({ success: false, message: 'Exercise not found' });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
+    postAnswer: async (req, res, next) => {
+        try {
+            const slug = req.params.slug;
+            const lecture = await Lecture.findOne({ lecture_slug: slug });
+            const currentProgress = await mark.findOne({ lecture_name: lecture.lecture_name });
+            // console.log(currentProgress.mark);
+            const currentMark = currentProgress.mark;
+
+            if (!lecture) {
+                return res.status(404).json({ success: false, message: 'Lecture not found' });
+            }
+
+            const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+
+            const questionNameToFind = req.query.question_name;
+
+            const specificExercise = exercises.find((exercise) =>
+                exercise.ex_question.some((question) => question.question_name === questionNameToFind)
+            );
+
+            if (specificExercise) {
+                const specificQuestion = specificExercise.ex_question.find(
+                    (question) => question.question_name === questionNameToFind
+                );
+
+                if (specificQuestion) {
+                    const correctAnswer = ['A', 'B', 'C', 'D']
+                        .find((option) => specificQuestion.question_content[`flag_${option.toLowerCase()}`] === 1);
+
+                    specificQuestion.correct_answer = correctAnswer;
+
+                    // console.log('Specific Question:', specificQuestion);
+                    const userAnswer = req.body.userAnswer;
+                    console.log(userAnswer);
+                    console.log(specificQuestion.correct_answer);
+
+                    if (userAnswer !== specificQuestion.correct_answer) {
+                        console.log("Wrong answer");
+                        return res.status(200).json({ success: true, currentProgress });
+
+                    }
+                    else if (userAnswer === specificQuestion.correct_answer) {
+                        const updateMark = currentMark + 1;
+                        const newProgress = await mark.findOneAndUpdate(
+                            { lecture_name: currentProgress.lecture_name },
+                            { $set: { mark: updateMark } }
+                        );
+                        console.log(newProgress);
+                        return res.status(200).json({ success: true, newProgress });
+                    }
+                } else {
+                    console.log('Specific question not found');
+                    return res.status(404).json({ success: false, message: 'Question not found' });
+                }
+            } else {
+                console.log('Exercise not found');
+                return res.status(404).json({ success: false, message: 'Exercise not found' });
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
     getFaqs: async (req, res, next) => {
         await FAQs.find().lean().then(faqs => {
             return res.status(200).json({ success: true, faqs })

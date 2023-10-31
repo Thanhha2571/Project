@@ -286,7 +286,7 @@ const TeacherController = {
     },
 
     postCreateExercise: async (req, res, next) => {
-        const { lecture_id, ex_id, ex_name } = req.body;
+        const { lecture_id, ex_id, ex_name, ex_question } = req.body;
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
         await Exercise.findOne({ ex_id: ex_id }).then(async ex => {
@@ -295,7 +295,8 @@ const TeacherController = {
                     lecture_id: lecture_id,
                     ex_id: ex_id,
                     ex_name: ex_name,
-                    teacher_email: token_decode.email
+                    teacher_email: token_decode.email,
+                    ex_question: ex_question
                 }
                 await Exercise(data).save();
                 return res.status(200).json({ success: true, msg: 'Thêm Bài Tập Thành Công !!!' })
@@ -303,7 +304,6 @@ const TeacherController = {
                 return res.status(400).json({ success: false, msg: 'Bài Tập Đã Tồn Tại !!!' })
             }
         })
-
     },
     getDelEx: async (req, res, next) => {
         const _id = req.params.id;
