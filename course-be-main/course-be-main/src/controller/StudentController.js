@@ -22,18 +22,18 @@ const StudentController = {
 
     getLectureDetail: async (req, res, next) => {
         try {
-            const slug = req.params.slug;
+            const lectureID = req.params.lectureID;
             // const course_slug = req.params.course_slug;
             // console.log(slug);
             // console.log(course_slug);
-            const lecture = await Lecture.findOne({ lecture_slug: slug });
+            const lecture = await Lecture.findOne({ _id: lectureID });
             // console.log(lecture);
 
             if (!lecture) {
                 return res.status(404).json({ success: false, message: 'Lecture not found' });
             }
 
-            const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+            const exercises = await Exercise.find({ lecture_id: lectureID });
             // console.log(exercises);
 
             return res.status(200).json({ success: true, lecture, exercises });
@@ -45,8 +45,8 @@ const StudentController = {
     },
     getQuestionDetail: async (req, res, next) => {
         try {
-            const slug = req.params.slug;
-            const lecture = await Lecture.findOne({ lecture_slug: slug });
+            const lectureID = req.params.lectureID;
+            const lecture = await Lecture.findOne({ _id: lectureID });
             const currentProgress = await mark.findOne({ lecture_name: lecture.lecture_name });
             // console.log(currentProgress.mark);
             const currentMark = currentProgress.mark;
@@ -55,7 +55,7 @@ const StudentController = {
                 return res.status(404).json({ success: false, message: 'Lecture not found' });
             }
 
-            const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+            const exercises = await Exercise.find({ lecture_id: lectureID });
 
             const questionNameToFind = req.query.question_name;
 
@@ -100,8 +100,8 @@ const StudentController = {
     },
     postAnswer: async (req, res, next) => {
         try {
-            const slug = req.params.slug;
-            const lecture = await Lecture.findOne({ lecture_slug: slug });
+            const lectureID = req.params.lectureID;
+            const lecture = await Lecture.findOne({ _id: lectureID });
             const currentProgress = await mark.findOne({ lecture_name: lecture.lecture_name });
             // console.log(currentProgress.mark);
             const currentMark = currentProgress.mark;
@@ -110,7 +110,7 @@ const StudentController = {
                 return res.status(404).json({ success: false, message: 'Lecture not found' });
             }
 
-            const exercises = await Exercise.find({ lecture_id: lecture.lecture_id });
+            const exercises = await Exercise.find({ lecture_id: lectureID });
 
             const questionNameToFind = req.query.question_name;
 

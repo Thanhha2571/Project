@@ -7,11 +7,11 @@ const CourseModel = new Schema({
         type: String,
         required: true,
     },
-    course_id: {
-        type: String,
-        required: true,
-        unique: true
-    },
+    // course_id: {
+    //     type: String,
+    //     required: true,
+    //     unique: true
+    // },
     sub_id: {
         type: String,
         // required: true,

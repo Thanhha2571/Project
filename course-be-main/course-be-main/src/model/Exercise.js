@@ -12,14 +12,15 @@ const ExerciseModel = new Schema({
         required: true,
         // unique: true
     },
-    ex_id: {
-        type: String,
-        required: true,
-        unique: true
-    },
+    // ex_id: {
+    //     type: String,
+    //     required: true,
+    //     unique: true
+    // },
     ex_name: {
         type: String,
         required: true,
+        unique: true
     },
     ex_question: {
         type: [Object],

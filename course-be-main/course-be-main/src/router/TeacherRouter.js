@@ -10,10 +10,10 @@ router.get('/delete-subject/:_id', teacherRole, TeacherController.deleteSubject)
 router.get('/delete-course/:_id', teacherRole, TeacherController.deleteCourse);
 router.get('/course/:_id', teacherRole, TeacherController.getCourse);
 router.get('/search-course/:key', teacherRole, TeacherController.searchCourse);
-router.get('/course-detail/:slug', TeacherController.getCourseDetail);
+router.get('/course-detail/:courseID', TeacherController.getCourseDetail);
 router.get('/course-detail/lecture/:id', TeacherController.getLecture);
 router.get('/delete-lecture/:_id', teacherRole, TeacherController.getDelLecture);
-router.get('/course/lecture-detail/:slug', teacherRole, TeacherController.getLectureDetail);
+router.get('/course/lecture-detail/:lectureID', teacherRole, TeacherController.getLectureDetail);
 router.get('/course/lecture/exercise/delete-exercise/:id', teacherRole, TeacherController.getDelEx);
 router.get('/delete-student/:_id', teacherRole, TeacherController.deleteStudent);
 // router.get('/get-mark/:param1/:param2', TeacherController.getMarkStudent);

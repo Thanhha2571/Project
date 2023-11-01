@@ -5,14 +5,15 @@ const SubjectModel = new Schema({
         type: String,
         required: true
     },
-    sub_id: {
+    // sub_id: {
+    //     type: String,
+    //     required: true,
+    //     unique: true
+    // },
+    sub_name: {
         type: String,
         required: true,
         unique: true
-    },
-    sub_name: {
-        type: String,
-        required: true
     },
 }, {
     timestamps: true

@@ -33,15 +33,15 @@ const TeacherController = {
         })
     },
     postCreateCourse: async (req, res, next) => {
-        const { course_id, course_name, course_description, dateStart, dateEnd, course_status, sub_id, course_price } = req.body;
+        const { course_name, course_description, dateStart, dateEnd, course_status, sub_id, course_price } = req.body;
         const file = req.file;
         if (!file) {
             return res.status(400).json({ success: false, msg: 'Vui Lòng Nhập Hình Ảnh' })
         }
-        let filePath = `src/public/uploads/courses/${course_id}`;
+        let filePath = `src/public/uploads/courses/${course_name}`;
         if (!fs.existsSync(filePath)) {
             fs.mkdirSync(filePath, { recursive: true });
-            fs.move(`src/public/uploads/courses/${file.filename}`, `src/public/uploads/courses/${course_id}/${file.filename}`, function (err) {
+            fs.move(`src/public/uploads/courses/${file.filename}`, `src/public/uploads/courses/${course_name}/${file.filename}`, function (err) {
                 if (err) return console.error(err)
                 // console.log("success!")
             })
@@ -51,11 +51,11 @@ const TeacherController = {
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
         try {
-            await Course.findOne({ course_id: course_id }).then(async course => {
+            await Course.findOne({ course_name: course_name }).then(async course => {
                 if (!course) {
                     const data = {
                         teacher_email: token_decode.email,
-                        course_id: course_id,
+                        // course_id: course_id,
                         course_price: course_price,
                         sub_id: sub_id,
                         course_name: course_name,
@@ -72,18 +72,18 @@ const TeacherController = {
                 }
             })
         } catch (error) {
-            return res.status(500).json({ success: false, msg: 'Có lỗi xảy ra' })
+            return res.status(500).json({ success: false, msg: 'Có lỗi xảy ra', error })
         }
     },
     postEditCourse: async (req, res, next) => {
         const { course_id, course_name, course_description, course_price, course_status, dateStart, dateEnd } = req.body;
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
-        await Course.findOne({ course_id: course_id, teacher_email: token_decode.email }).then(async course => {
+        await Course.findOne({ _id: course_id, teacher_email: token_decode.email }).then(async course => {
             if (!course) {
                 return res.status(400).json({ success: false, msg: 'Khoá học không tồn tại' })
             }
-            course.course_id = course_id;
+            course._id = course_id;
             course.course_name = course_name;
             course.course_description = course_description;
             course.dateStart = dateStart;
@@ -154,16 +154,17 @@ const TeacherController = {
     postCreateSubject: async (req, res, next) => {
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
-        const { sub_id, sub_name } = req.body;
-        await Subject.findOne({ sub_id: sub_id }).then(async subject => {
+        const { sub_name } = req.body;
+        await Subject.findOne({ sub_name: sub_name }).then(async subject => {
             if (!subject) {
                 let data = {
-                    sub_id: sub_id,
+                    // sub_id: sub_id,
                     sub_name: sub_name,
                     teacher_email: token_decode.email
                 }
                 await Subject(data).save();
-                return res.status(200).json({ success: true, msg: "Thêm Môn Học Thành Công", data: subject })
+                const newSubject = await Subject.findOne({ sub_name: sub_name })
+                return res.status(200).json({ success: true, msg: "Thêm Môn Học Thành Công", data: newSubject })
             } else {
                 return res.status(300).json({ success: false, msg: "Môn Học Đã Tồn Tại !!!" })
             }
@@ -190,17 +191,17 @@ const TeacherController = {
         })
     },
     getCourseDetail: async (req, res, next) => {
-        const slug = req.params.slug;
+        const courseID = req.params.courseID;
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
         try {
-            const course = await Course.findOne({ course_slug: slug });
-            const subject = await Subject.findOne({ course_id: course.course_id });
-            const lecture = await Lecture.find({ course_id: course.course_id }).lean();
-            const history = await History.findOne({ course_id: course.course_id, email: token_decode.email });
-            const studentList = await History.find({ course_id: course.course_id });
+            const course = await Course.findOne({ _id: courseID });
+            const subject = await Subject.findOne({ course_id: courseID });
+            const lecture = await Lecture.find({ course_id: courseID }).lean();
+            const history = await History.findOne({ course_id: courseID, email: token_decode.email });
+            const studentList = await History.find({ course_id: courseID });
             const courseDetail = {
-                course_id: course.course_id,
+                course_id: courseID,
                 course_name: course.course_name,
                 course_description: course.course_description,
                 course_price: course.course_price,
@@ -229,22 +230,23 @@ const TeacherController = {
         })
     },
     postCreateLecture: async (req, res, next) => {
-        const { course_id, lecture_id, lecture_name, lecture_content, lecture_image, lecture_document } = req.body;
+        const { course_id, lecture_name, lecture_content, lecture_image, lecture_document } = req.body;
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
-        await Lecture.findOne({ lecture_id: lecture_id }).then(async lecture => {
+        await Lecture.findOne({ lecture_name: lecture_name }).then(async lecture => {
             if (!lecture) {
                 const data = {
                     teacher_email: token_decode.email,
                     course_id: course_id,
-                    lecture_id: lecture_id,
+                    // lecture_id: lecture_id,
                     lecture_name: lecture_name,
                     lecture_content: lecture_content,
                     lecture_document: lecture_document,
                     lecture_image: lecture_image
                 }
                 await Lecture(data).save();
-                return res.status(200).json({ success: true, msg: 'Thêm Bài Giảng Thành Công !' })
+                const newLecture = await Lecture.findOne({ lecture_name: lecture_name })
+                return res.status(200).json({ success: true, msg: 'Thêm Bài Giảng Thành Công !', newLecture })
             } else {
                 return res.status(400).json({ success: false, msg: 'Bài Giảng Đã Tồn Tại !' })
             }
@@ -260,12 +262,12 @@ const TeacherController = {
         }
     },
     getLectureDetail: async (req, res, next) => {
-        const slug = req.params.slug;
-        const lecture = await Lecture.findOne({ lecture_slug: slug });
-        const exercise = await Exercise.find({ lecture_id: lecture.lecture_id });
+        const lectureID = req.params.lectureID;
+        const lecture = await Lecture.findOne({ _id: lectureID });
+        const exercise = await Exercise.find({ lecture_id: lectureID });
         return res.status(200).json({ success: true, lecture, exercise });
     },
-    getMarkStudent : async (req, res, next) => {
+    getMarkStudent: async (req, res, next) => {
         // const token = req.headers['authorization'];
         // const token_decode = jwt_decode(token);
         // const getCourse = req.params.param1;
@@ -276,7 +278,7 @@ const TeacherController = {
         //     lecture_name:lecture ,
         //     course_name: getCourse
 
-            
+
         // })
         // console.log("getMarkStudent :" , getMarkStudent)
         // res.status(200).json({ success: true, "mark of this course : " :getMarkStudent })
@@ -286,14 +288,15 @@ const TeacherController = {
     },
 
     postCreateExercise: async (req, res, next) => {
-        const { lecture_id, ex_id, ex_name, ex_question } = req.body;
+        const { lecture_id, ex_name, ex_question } = req.body;
         const token = req.headers['authorization'];
         const token_decode = jwt_decode(token);
-        await Exercise.findOne({ ex_id: ex_id }).then(async ex => {
+        // console.log(token_decode);
+        await Exercise.findOne({ ex_name: ex_name }).then(async ex => {
             if (!ex) {
                 const data = {
                     lecture_id: lecture_id,
-                    ex_id: ex_id,
+                    // ex_id: ex_id,
                     ex_name: ex_name,
                     teacher_email: token_decode.email,
                     ex_question: ex_question
@@ -315,11 +318,17 @@ const TeacherController = {
         }
     },
     postCreateQuestion: async (req, res, next) => {
-        const { question_name, ex_id, question_content } = req.body;
+        const { question_name, ex_id, question_content, question_des } = req.body;
 
         // ex_id la _id cua field
         await Exercise.findByIdAndUpdate({ _id: ex_id }, {
-            $push: { ex_question: { question_name: question_name, question_content: question_content } }
+            $push: {
+                ex_question: {
+                    question_name: question_name,
+                    question_content: question_content,
+                    question_des: question_des
+                }
+            }
         })
         return res.status(200).json({ success: true, msg: 'Thêm Câu Hỏi Thành Công' })
     },

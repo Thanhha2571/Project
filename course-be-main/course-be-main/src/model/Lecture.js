@@ -11,14 +11,15 @@ const LectureModel = new Schema({
         type: String,
         required: true,
     },
-    lecture_id: {
-        type: String,
-        // required: true,
-        // unique: true
-    },
+    // lecture_id: {
+    //     type: String,
+    //     // required: true,
+    //     // unique: true
+    // },
     lecture_name: {
         type: String,
         required: true,
+        unique: true
     },
     lecture_content: {
         type: String,
